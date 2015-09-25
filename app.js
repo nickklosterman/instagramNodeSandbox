@@ -25,6 +25,10 @@ ig.user_self_feed( {count:500},function(err, medias, pagination, remaining, limi
 		//})
 //		console.log(element.images.standard_resolution.url); //appears max display resolution is 640x640
 	    }
+	    	if (element.videos) {
+		    saveFile(element.user.username,extractHighestResolutionVideo(element.videos));
+		}
+	
 	//    console.log(element.user.username)
 	})
 
@@ -63,7 +67,20 @@ function extractHighestResURL(images){
     } else {
 	return null;
     }
-}
+};
+
+function extractHighestResolutionVideo(videos){
+    if (videos.standard_resolution) {
+	return videos.standard_resolution.url;
+    } else if (videos.low_resolution) {
+	return videos.low_resolution.url;
+    } else {
+	return null;
+    }
+    
+};
+
+
 
 //function 
 
