@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/nickklosterman/instagramNodeSandbox",
   "dependencies": {
-      "instagram-node": "^0.5.1",
+      "instagram-node": "^0.5.8",
       "request":"2.47.0"
   }
 }
