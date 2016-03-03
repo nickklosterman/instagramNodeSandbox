@@ -1,60 +1,29 @@
 var ig = require('instagram-node').instagram(),
     request = require('request'),
     fs = require('fs');
+
 console.log(process.env.INSTAGRAM_ACCESS_TOKEN);
 ig.use({ access_token: process.env.INSTAGRAM_ACCESS_TOKEN });
-/*ig.use({ client_id: process.env.INSTAGRAM_CLIENT_ID,
-  client_secret: process.env.INSTAGRAM_CLIENT_SECRET });
-*/
 
 ig.user_self_feed( {count:500},function(err, medias, pagination, remaining, limit) {
     if (err){
 	throw err
     }
     if (medias){
-	//console.log(medias)
 	medias.forEach(function(element,index,fullArray) {
-	    if (element.images){// &&
-	//	element.images.length > 0 &&
-	//	element.images.standard_resolution) {
-//		console.log(element.images)
-//		console.log("-----",element.user.username)
+	    if (element.images){
 		saveFile(element.user.username,extractHighestResURL(element.images));
-		//element.images.forEach(function(ele,idx,fA){
-		//console.log(ele)
-		//})
-//		console.log(element.images.standard_resolution.url); //appears max display resolution is 640x640
 	    }
 	    	if (element.videos) {
 		    saveFile(element.user.username,extractHighestResolutionVideo(element.videos));
 		}
-	
-	//    console.log(element.user.username)
 	})
 
     }
-//    console.log(pagination)
     console.log("remaining:",remaining);
     console.log("limit:",limit);
 });
 
-var userArray=['ericcanete','jakeparker','p_e_a_r_c_e'];
-
-// userArray.forEach(function(user_id/*ele*/,ind,arr){
-//     console.log(user_id);
-//     ig.user_media_recent(user_id, function(err,medias,pagination, remaining,limit) {
-// 	if (err){ throw err }
-// 	if (medias){
-// 	    medias.forEach(function(element,index,fullArray) {
-// 		if (element.images){
-// 		    saveFile(element.user.username,extractHighestResURL(element.images));
-// 		}
-// 	    })
-// 	}
-// 	console.log("remaining:",remaining);
-// 	console.log("limit:",limit);    
-//     });
-// });
 
 function extractHighestResURL(images){
     if (images.standard_resolution) {
@@ -80,8 +49,6 @@ function extractHighestResolutionVideo(videos){
     
 };
 
-
-
 //function 
 
 /*TumblrConnection.prototype.*/function saveFile(username,url){
@@ -89,10 +56,19 @@ function extractHighestResolutionVideo(videos){
     if (url !== null) {
     var splitURL = url.split('/'),
 	imageFilename = splitURL[splitURL.length-1],
+	filename,
+	questionMarkIndex = imageFilename.indexOf('?');
+	
+	//they changed the filename so they look like this now dannybeckart_1172091_799294770175756_1563873002_n.jpg?ig_cache_key=MTE5NzMyMDA5MjcwNDA2NTE5NA%3D%3D.2
+	if ( questionMarkIndex != -1 ) {
+	    imageFilename = imageFilename.substr(0,imageFilename.indexOf('?'));
+	}
 	filename=username+"_"+imageFilename;
+	
+
 	//console.log(splitURL);
     if ( fs.existsSync(filename) ) {
-	//console.log(filename+" already exists. Skipping.")
+	console.log(filename+" already exists. Skipping.")
 	//process.stdout.write("X")
     } else {
 	var imageStream=fs.createWriteStream(filename)
@@ -120,7 +96,7 @@ function extractHighestResolutionVideo(videos){
 	imageStream.on('error',function(error) {
             if (error) {
 		console.log("imageStream error:"+error)
-		saveFile(usrename,url);//call ourself again if there was an error (mostlikely due to hitting the server too hard)
+		saveFile(username,url);//call ourself again if there was an error (mostlikely due to hitting the server too hard)
             }
 	})
 	imagerequest.pipe(imageStream)
